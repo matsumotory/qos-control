@@ -1,0 +1,98 @@
+#!/bin/sh
+#############################################################################################
+#
+#    Sets Up CBQ-based Traffic Control Start Script Tool
+#       Copyright (C) 2010 MATSUMOTO, Ryosuke
+#
+#    This Code was written by matsumoto_r in 2010/09/01
+#
+#    Usage:
+#       /etc/rc.d/init.d/qos.init {start|stop|restart|condrestart|status}
+#
+#############################################################################################
+#
+# Change Log
+#
+# 2010/09/01 matsumoto_r first release
+#
+#############################################################################################
+
+
+#
+# qos.init  qos start script.
+#
+#
+# chkconfig: - 66 34
+# description: qos provide set Quarity and Service.
+#
+
+### BEGIN INIT INFO
+# Provides: qos.init
+# Required-Start: $local_fs $network
+# Required-Stop: $local_fs $network
+# Default-Start:
+# Default-Stop: 0 1 2 3 4 5 6
+# Short-Description: qos init script
+# Description: qos provide set Quarity and Service.
+### END INIT INFO
+
+. /etc/rc.d/init.d/functions
+
+. /etc/sysconfig/network
+
+[ ${NETWORKING} = "no" ] && exit 0
+
+RETVAL=0
+qos="/usr/local/sbin/qos.sh"
+prog="qos.init"
+lockfile="/var/lock/subsys/qos.init"
+
+[ -f $qos ] || exit 0
+
+start() {
+    echo -n $"Starting $prog: "
+    $qos start
+    RETVAL=$?
+    [ $RETVAL = 0 ] && touch $lockfile && success && echo 
+    [ $RETVAL != 0 ] && failure && echo
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    $qos stop
+    RETVAL=$?
+    [ $RETVAL = 0 ] && rm -f $lockfile && success && echo
+    [ $RETVAL != 0 ] && failure && echo
+    return $RETVAL
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart|reload)
+        stop
+        start
+        RETVAL=$?
+        ;;
+    condrestart)
+        if [ -f $lockfile ]; then
+            stop
+            start
+            RETVAL=$?
+        fi
+        ;;
+    status)
+        $qos stats
+        RETVAL=$?
+        ;;
+    *)
+    echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+    exit 1
+esac
+
+exit $RETVAL
