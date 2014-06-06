@@ -1,0 +1,7 @@
+## Setup
+
+Install required modules.
+
+```
+./setup.sh
+```

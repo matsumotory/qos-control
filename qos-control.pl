@@ -19,7 +19,9 @@
 
 use strict;
 use warnings;
-use lib "/usr/local/lib/myperl_lib";
+use FindBin;
+use lib "$FindBin::Bin/lib";
+use lib "$FindBin::Bin/extlib/lib/perl5";
 use System::Base;
 use File::Spec;
 use File::Basename;
@@ -55,11 +57,11 @@ our $PROTOCOL_LIST = {
                     id      =>  0,
                     port    =>  "",
                 },
-    ftp     =>  {   
+    ftp     =>  {
                     id      =>  1,
                     port    =>  20,
                 },
-    ssh     =>  {   
+    ssh     =>  {
                     id      =>  2,
                     port    =>  22,
                 },
@@ -220,7 +222,7 @@ CONFIG
     print "------------------------------\n";
     &view($ip);
     print "------------------------------\n";
-   
+
 }
 
 sub view {
