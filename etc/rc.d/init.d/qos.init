@@ -37,6 +37,7 @@
 ### END INIT INFO
 
 . /etc/init.d/functions
+. /lib/lsb/init-functions
 
 . /etc/sysconfig/network
 
