@@ -7,6 +7,9 @@ perl cpanm -n -l extlib Module::CoreList
 perl -Iextlib/lib/perl5 cpanm -n -L extlib --installdeps .
 
 # copy traffic control scripts
+if [ ! -d /etc/sysconfig ]; then
+  sudo mkdir /etc/sysconfig
+fi
 sudo cp -prv etc/sysconfig/qos /etc/sysconfig/.
 sudo cp -prv etc/rc.d/init.d/qos.init /etc/init.d/.
 sudo cp -prv bin/qos.sh /usr/local/sbin/.
