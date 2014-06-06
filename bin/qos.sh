@@ -238,11 +238,11 @@ elif [ -n "$CBQ_DEBUG" ]; then
 	} # tc
 else
 	### Default wrappers
-	
+
 	ip () {
 		$IP "$@"
 	} # ip
-	
+
 	tc () {
 		$TC "$@"
 	} # tc
@@ -337,27 +337,27 @@ for classfile in $CLASSLIST; do
             ### Split rule into source & destination
             SRC=${rule%%,*}; DST=${rule##*,}
             [ "$SRC" = "$rule" ] && SRC=""
-            
+
             ### Split destination into address, port & mask fields
             DADDR=${DST%%:*}; DTEMP=${DST##*:}
             [ "$DADDR" = "$DST" ] && DTEMP=""
-            
+
             DPORT=${DTEMP%%/*}; DMASK=${DTEMP##*/}
             [ "$DPORT" = "$DTEMP" ] && DMASK="0xffff"
-            
+
             ### Split up source (if specified)
             SADDR=""; SPORT=""
             if [ -n "$SRC" ]; then
             	SADDR=${SRC%%:*}; STEMP=${SRC##*:}
             	[ "$SADDR" = "$SRC" ] && STEMP=""
-            
+
             	SPORT=${STEMP%%/*}; SMASK=${STEMP##*/}
             	[ "$SPORT" = "$STEMP" ] && SMASK="0xffff"
             fi
-            
+
             ### Convert asterisks to empty strings
             SADDR=${SADDR#\*}; DADDR=${DADDR#\*}
-            
+
             ### Compose u32 filter rules
             u32_s="${SPORT:+match ip dport $SPORT $SMASK}"
             u32_s="${SADDR:+match ip dst $SADDR} $u32_s"
@@ -483,7 +483,7 @@ for classfile in $CLASSLIST; do
 	MATCH=0; CHANGE=0
 	for timerule in $TIMESET; do
 		TIME_ABS=`cbq_time2abs $TIME_NOW`
-		
+
 		### Split TIME rule to pieces
 		TIMESPEC=${timerule%%;*}; PARAMS=${timerule##*;}
 		WEEKDAYS=${TIMESPEC%%/*}; INTERVAL=${TIMESPEC##*/}
