@@ -55,7 +55,10 @@ fi
 RETVAL=0
 qos="/usr/local/sbin/qos.sh"
 prog="qos.init"
+lockdir="/var/lock/subsys"
 lockfile="/var/lock/subsys/qos.init"
+
+[ -d $lockdir ] || mkdir $lockdir
 
 [ -f $qos ] || exit 0
 
