@@ -1,8 +1,8 @@
 # qos-control.pl
-Traffic control tool using cbq, tc and iproute for CentOS. cbq don't support inbound traffic control, but qos-control.pl supported inbound traffic control using htb and ifb. You can control traffic easily and safely.
+Traffic control tool using cbq, tc and iproute for CentOS and Ubuntu. cbq don't support inbound traffic control, but qos-control.pl supported inbound traffic control using htb and ifb. You can control traffic easily and safely.
 
 ## TODO
-Support other distri like Fedora, Ubuntu and so on. Wellcome Pull-Request.
+Support other distri like Fedora, Debian and so on. Wellcome Pull-Request.
 
 ## Quick Install
 #### Download
