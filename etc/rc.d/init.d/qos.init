@@ -36,7 +36,7 @@
 # Description: qos provide set Quarity and Service.
 ### END INIT INFO
 
-. /etc/rc.d/init.d/functions
+. /etc/init.d/functions
 
 . /etc/sysconfig/network
 
