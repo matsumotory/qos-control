@@ -36,12 +36,21 @@
 # Description: qos provide set Quarity and Service.
 ### END INIT INFO
 
-. /etc/init.d/functions
-. /lib/lsb/init-functions
+if [ -f /etc/init.d/functions ]; then
+  . /etc/init.d/functions
+  SUCCESS=success
+  FAILURE=failure
+else
+  . /lib/lsb/init-functions
+  SUCCESS=log_success_msg
+  FAILURE=log_failure_msg
+fi
 
-. /etc/sysconfig/network
+if [ -f /etc/sysconfig/network ]; then
+  . /etc/sysconfig/network
+  [ ${NETWORKING} = "no" ] && exit 0
+fi
 
-[ ${NETWORKING} = "no" ] && exit 0
 
 RETVAL=0
 qos="/usr/local/sbin/qos.sh"
@@ -54,8 +63,8 @@ start() {
     echo -n $"Starting $prog: "
     $qos start
     RETVAL=$?
-    [ $RETVAL = 0 ] && touch $lockfile && success && echo 
-    [ $RETVAL != 0 ] && failure && echo
+    [ $RETVAL = 0 ] && touch $lockfile && $SUCCESS && echo
+    [ $RETVAL != 0 ] && $FAILURE && echo
     return $RETVAL
 }
 
@@ -63,8 +72,8 @@ stop() {
     echo -n $"Stopping $prog: "
     $qos stop
     RETVAL=$?
-    [ $RETVAL = 0 ] && rm -f $lockfile && success && echo
-    [ $RETVAL != 0 ] && failure && echo
+    [ $RETVAL = 0 ] && rm -f $lockfile && $SUCCESS && echo
+    [ $RETVAL != 0 ] && $FAILURE && echo
     return $RETVAL
 }
 
