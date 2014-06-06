@@ -44,7 +44,7 @@ CBQ_CACHE=${CBQ_CACHE:-/var/cache/qos.init}
 ### Modules to probe for. Uncomment the last CBQ_PROBE
 ### line if you have QoS support compiled into kernel
 CBQ_PROBE="sch_cbq sch_tbf sch_sfq sch_prio"
-CBQ_PROBE="$CBQ_PROBE cls_fw cls_u32 cls_route"
+CBQ_PROBE="$CBQ_PROBE cls_fw cls_u32 cls_route ifb"
 #CBQ_PROBE=""
 
 ### Keywords required for qdisc & class configuration
@@ -71,7 +71,8 @@ cbq_device_list () {
 ### Remove root class from device $1
 cbq_device_off () {
     tc qdisc del dev $1 root 2> /dev/null
-        tc qdisc del dev $1 ingress handle ffff: 2> /dev/null
+    tc qdisc del dev $1 ingress handle ffff: 2> /dev/null
+    tc qdisc del dev ifb0 root handle 1: htb > /dev/null 2>&1
 } # cbq_device_off
 
 
@@ -329,43 +330,46 @@ for classfile in $CLASSLIST; do
 
 # matsumoto_r
     if [ "$DIRECTION" = "in" ]; then
-	    for rule in `echo "$CFILE"| sed -n '/^RULE/ { s/.*=//; p; }'`; do
-	    	### Split rule into source & destination
-	    	SRC=${rule%%,*}; DST=${rule##*,}
-	    	[ "$SRC" = "$rule" ] && SRC=""
+        ip link set dev ifb0 up
+        $MP act_mirred
+        sleep 2
+	for rule in `echo "$CFILE"| sed -n '/^RULE/ { s/.*=//; p; }'`; do
+            ### Split rule into source & destination
+            SRC=${rule%%,*}; DST=${rule##*,}
+            [ "$SRC" = "$rule" ] && SRC=""
+            
+            ### Split destination into address, port & mask fields
+            DADDR=${DST%%:*}; DTEMP=${DST##*:}
+            [ "$DADDR" = "$DST" ] && DTEMP=""
+            
+            DPORT=${DTEMP%%/*}; DMASK=${DTEMP##*/}
+            [ "$DPORT" = "$DTEMP" ] && DMASK="0xffff"
+            
+            ### Split up source (if specified)
+            SADDR=""; SPORT=""
+            if [ -n "$SRC" ]; then
+            	SADDR=${SRC%%:*}; STEMP=${SRC##*:}
+            	[ "$SADDR" = "$SRC" ] && STEMP=""
+            
+            	SPORT=${STEMP%%/*}; SMASK=${STEMP##*/}
+            	[ "$SPORT" = "$STEMP" ] && SMASK="0xffff"
+            fi
+            
+            ### Convert asterisks to empty strings
+            SADDR=${SADDR#\*}; DADDR=${DADDR#\*}
+            
+            ### Compose u32 filter rules
+            u32_s="${SPORT:+match ip dport $SPORT $SMASK}"
+            u32_s="${SADDR:+match ip dst $SADDR} $u32_s"
+            u32_d="${DPORT:+match ip sport $DPORT $DMASK}"
+            u32_d="${DADDR:+match ip src $DADDR} $u32_d"
 
+	done ### rule
 
-	    	### Split destination into address, port & mask fields
-	    	DADDR=${DST%%:*}; DTEMP=${DST##*:}
-	    	[ "$DADDR" = "$DST" ] && DTEMP=""
-
-	    	DPORT=${DTEMP%%/*}; DMASK=${DTEMP##*/}
-	    	[ "$DPORT" = "$DTEMP" ] && DMASK="0xffff"
-
-
-	    	### Split up source (if specified)
-	    	SADDR=""; SPORT=""
-	    	if [ -n "$SRC" ]; then
-	    		SADDR=${SRC%%:*}; STEMP=${SRC##*:}
-	    		[ "$SADDR" = "$SRC" ] && STEMP=""
-
-	    		SPORT=${STEMP%%/*}; SMASK=${STEMP##*/}
-	    		[ "$SPORT" = "$STEMP" ] && SMASK="0xffff"
-	    	fi
-
-
-	    	### Convert asterisks to empty strings
-	    	SADDR=${SADDR#\*}; DADDR=${DADDR#\*}
-
-	    	### Compose u32 filter rules
-	    	u32_s="${SPORT:+match ip dport $SPORT $SMASK}"
-	    	u32_s="${SADDR:+match ip dst $SADDR} $u32_s"
-	    	u32_d="${DPORT:+match ip sport $DPORT $DMASK}"
-	    	u32_d="${DADDR:+match ip src $DADDR} $u32_d"
-
-	    done ### rule
-
-        tc filter add dev $DEVICE parent ffff: protocol ip prio $PRIO u32 $u32_s $u32_d police rate $RATE burst $WEIGHT drop flowid :1
+        tc qdisc add dev $DEVICE ingress handle ffff:
+        tc filter add dev $DEVICE parent ffff: protocol ip prio $PRIO u32 $u32_s $u32_d flowid 1:1 action mirred egress redirect dev ifb0
+        tc qdisc add dev ifb0 root handle 1: htb default $CLASS
+        tc class add dev ifb0 parent 1:$PARENT classid 1:$CLASS htb rate $RATE
         continue
     fi
 
