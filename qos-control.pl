@@ -32,7 +32,7 @@ $| = 1;
 our $VERSION    = '1.01';
 our $SCRIPT     = basename($0);
 
-our $QOS_INIT     = File::Spec->catfile("/etc", "rc.d", "init.d", "qos.init");
+our $QOS_INIT     = File::Spec->catfile("/etc", "init.d", "qos.init");
 our $QOS_MODULE   = File::Spec->catfile("/usr", "local", "sbin", "qos.sh");
 our $QOS_CONF_DIR = File::Spec->catfile("/etc", "sysconfig", "qos");
 
