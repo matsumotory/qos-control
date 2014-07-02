@@ -93,6 +93,10 @@ our $PROTOCOL_LIST = {
                     id      =>  9,
                     port    =>  995,
                 },
+    dns     =>  {
+                    id      =>  10,
+                    port    =>  53,
+                },
 
 };
 
