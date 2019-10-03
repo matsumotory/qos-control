@@ -31,3 +31,4 @@ WORKDIR /app
 RUN git clone https://github.com/matsumotory/qos-control /app
 RUN cp /app/etc/rc.d/init.d/qos.init /etc/rc.d/init.d/
 
+COPY set-ether.sh /app/set-ether.sh
