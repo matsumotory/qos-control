@@ -1,16 +1,26 @@
 FROM centos:7
 
 RUN yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-RUN yum install -y \ 
-    sudo \
-    git \
-    vim \
+RUN yum install -y sudo gcc make git vim \
     iproute \
     ethtool \
     redhat-lsb-core \
     initscripts \
     perl-Class-Accessor \
     perl-Jcode \
+    perl-Carp \
+    perl-Storable \
+    perl-parent \
+    perl-File-Spec-Native \
+    perl-Scalar-List-Utils \
+    perl-PathTools \
+    perl-Pod-Simple \
+    perl-Encode \
+    perl-podlators \
+    perl-ExtUtils-Install \
+    perl-ExtUtils-MakeMaker \
+    perl-Module-CoreList \
+    perl-Data-Dumper \
     dstat \
     python-setuptools \
  && easy_install speedtest-cli
